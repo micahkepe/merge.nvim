@@ -104,47 +104,46 @@ local function find_current_conflict()
     return nil
 end
 
--- Commands for merge conflict resolution
-vim.api.nvim_create_user_command('MergeEditor', function()
-    local conflict = find_current_conflict()
-    if not conflict then
-        vim.notify("No merge conflict found at cursor position", vim.log.levels.ERROR)
-        return
-    end
-    
-    local windows = create_diff_windows(conflict.current, conflict.incoming)
-    
-    -- Set up keymaps for the diff views
-    local function close_windows()
-        vim.api.nvim_win_close(windows.windows.current, true)
-        vim.api.nvim_win_close(windows.windows.incoming, true)
-    end
-    
-    -- Add keymaps for accepting changes
-    for _, buf in pairs(windows.buffers) do
-        vim.keymap.set('n', 'q', close_windows, { buffer = buf })
-        vim.keymap.set('n', '<leader>mc', function()
-            vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, conflict.current)
-            close_windows()
-        end, { buffer = buf })
-        
-        vim.keymap.set('n', '<leader>mi', function()
-            vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, conflict.incoming)
-            close_windows()
-        end, { buffer = buf })
-        
-        vim.keymap.set('n', '<leader>mb', function()
-            local combined = vim.list_extend(vim.list_slice(conflict.current), conflict.incoming)
-            vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, combined)
-            close_windows()
-        end, { buffer = buf })
-    end
-end, {})
-
 -- Plugin configuration
 M.setup = function(opts)
     opts = opts or {}
-    -- Add any configuration options here
+    
+    -- Create user commands
+    vim.api.nvim_create_user_command('MergeEditor', function()
+        local conflict = find_current_conflict()
+        if not conflict then
+            vim.notify("No merge conflict found at cursor position", vim.log.levels.ERROR)
+            return
+        end
+        
+        local windows = create_diff_windows(conflict.current, conflict.incoming)
+        
+        -- Set up keymaps for the diff views
+        local function close_windows()
+            vim.api.nvim_win_close(windows.windows.current, true)
+            vim.api.nvim_win_close(windows.windows.incoming, true)
+        end
+        
+        -- Add keymaps for accepting changes
+        for _, buf in pairs(windows.buffers) do
+            vim.keymap.set('n', 'q', close_windows, { buffer = buf })
+            vim.keymap.set('n', '<leader>mc', function()
+                vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, conflict.current)
+                close_windows()
+            end, { buffer = buf })
+            
+            vim.keymap.set('n', '<leader>mi', function()
+                vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, conflict.incoming)
+                close_windows()
+            end, { buffer = buf })
+            
+            vim.keymap.set('n', '<leader>mb', function()
+                local combined = vim.list_extend(vim.list_slice(conflict.current), conflict.incoming)
+                vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers.end, false, combined)
+                close_windows()
+            end, { buffer = buf })
+        end
+    end, {})
 end
 
 return M
