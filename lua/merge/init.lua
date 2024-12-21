@@ -61,8 +61,8 @@ local function create_diff_windows(current_changes, incoming_changes)
 
 	-- Set buffer options
 	for _, buf in ipairs({ current_buf, incoming_buf }) do
-		vim.api.nvim_set_option_value("modifiable", false, { buf })
-		vim.api.nvim_set_option_value("buftype", "nofile", { buf })
+		vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+		vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
 	end
 
 	return {
