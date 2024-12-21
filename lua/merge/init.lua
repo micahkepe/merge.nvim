@@ -147,15 +147,18 @@ function M.setup(opts)
 			return
 		end
 
-		local windows = create_diff_windows(conflict.current, conflict.incoming)
-
 		-- Set up keymaps for the diff views
 		local function close_windows()
-			vim.api.nvim_win_close(windows.windows.current, true)
-			vim.api.nvim_win_close(windows.windows.incoming, true)
-			vim.api.nvim_buf_delete(windows.buffers.current, { force = true })
-			vim.api.nvim_buf_delete(windows.buffers.incoming, { force = true })
+			if not _G.merge_windows then return end
+			vim.api.nvim_win_close(_G.merge_windows.windows.current, true)
+			vim.api.nvim_win_close(_G.merge_windows.windows.incoming, true)
+			vim.api.nvim_buf_delete(_G.merge_windows.buffers.current, { force = true })
+			vim.api.nvim_buf_delete(_G.merge_windows.buffers.incoming, { force = true })
+			_G.merge_windows = nil
 		end
+		close_windows()
+		_G.merge_windows = create_diff_windows(conflict.current, conflict.incoming)
+		vim.keymap.set("n", "q", close_windows, { noremap = true, silent = true })
 
 		-- Add keymaps for accepting changes
 		for _, buf in pairs(windows.buffers) do
