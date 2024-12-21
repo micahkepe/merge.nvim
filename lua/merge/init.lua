@@ -161,36 +161,42 @@ function M.setup(opts)
 		vim.keymap.set("n", "q", close_windows, { noremap = true, silent = true })
 
 		-- Add keymaps for accepting changes
-		for _, buf in pairs(windows.buffers) do
-			vim.keymap.set("n", "q", close_windows, { buffer = buf })
-			vim.keymap.set("n", "<leader>mc", function()
-				vim.api.nvim_buf_set_lines(
-					0,
-					conflict.markers.start - 1,
-					conflict.markers["end"],
-					false,
-					conflict.current
-				)
-				close_windows()
-			end, { buffer = buf })
-
-			vim.keymap.set("n", "<leader>mi", function()
-				vim.api.nvim_buf_set_lines(
-					0,
-					conflict.markers.start - 1,
-					conflict.markers["end"],
-					false,
-					conflict.incoming
-				)
-				close_windows()
-			end, { buffer = buf })
-
-			vim.keymap.set("n", "<leader>mb", function()
-				local combined = combine_arrays(conflict.current, conflict.incoming)
-				vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers["end"], false, combined)
-				close_windows()
-			end, { buffer = buf })
+		local function del_keymaps()
+			vim.keymap.del("n", "<leader>mc")
+			vim.keymap.del("n", "<leader>mi")
+			vim.keymap.del("n", "<leader>mb")
 		end
+
+		vim.keymap.set("n", "<leader>mc", function()
+			vim.api.nvim_buf_set_lines(
+				0,
+				conflict.markers.start - 1,
+				conflict.markers["end"],
+				false,
+				conflict.current
+			)
+			close_windows()
+			del_keymaps()
+		end)
+
+		vim.keymap.set("n", "<leader>mi", function()
+			vim.api.nvim_buf_set_lines(
+				0,
+				conflict.markers.start - 1,
+				conflict.markers["end"],
+				false,
+				conflict.incoming
+			)
+			close_windows()
+			del_keymaps()
+		end)
+
+		vim.keymap.set("n", "<leader>mb", function()
+			local combined = combine_arrays(conflict.current, conflict.incoming)
+			vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers["end"], false, combined)
+			close_windows()
+			del_keymaps()
+		end)
 	end, {})
 end
 
