@@ -1,6 +1,6 @@
-# merge.nvim
+# merge.nvim (WIP)
 
-A Neovim plugin for enhanced merge conflict resolution.
+In-development Neovim plugin for enhanced merge conflict resolution.
 
 ## Installation
 
@@ -10,9 +10,7 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 {
     "micahkepe/merge.nvim",
     config = function()
-        require("merge.nvim").setup({
-            -- your configuration options here
-        })
+        require("merge").setup {}
     end,
 }
 ```
@@ -22,14 +20,17 @@ Using [lazy.nvim](https://github.com/folke/lazy.nvim):
 The plugin provides the following commands and keymaps:
 
 - `:MergeEditor` - Open the merge editor UI
+- TODO: following mappings suck
 - `<leader>mc` - Accept current change
 - `<leader>mi` - Accept incoming change
 - `<leader>mb` - Accept both changes
 
+## Default Settings
+
 ## Configuration
 
 ```lua
-require("merge.nvim").setup({
+require("merge").setup({
     -- your configuration options here
 })
 ```

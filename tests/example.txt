@@ -1,0 +1,19 @@
+This is a test file with merge conflicts.
+
+<<<<<<< HEAD
+This is the current change in your branch.
+Some more current changes.
+=======
+This is the incoming change from another branch.
+More incoming changes here.
+>>>>>>> feature-branch
+
+Some text after the merge conflict.
+
+<<<<<<< HEAD
+Another conflict here in current branch
+=======
+Another conflict here in feature branch
+>>>>>>> feature-branch
+
+End of file.

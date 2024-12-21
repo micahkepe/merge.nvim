@@ -1,3 +1,5 @@
+-- FIX: doesn't allow closing and function calls are wrong for setting
+-- windows
 local M = {}
 
 -- Helper function to slice a list/table
