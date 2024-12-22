@@ -61,8 +61,8 @@ local function create_diff_windows(current_changes, incoming_changes)
 
 	-- Set buffer options
 	for _, buf in ipairs({ current_buf, incoming_buf }) do
-		vim.api.nvim_set_option_value("modifiable", false, { buf })
-		vim.api.nvim_set_option_value("buftype", "nofile", { buf })
+		vim.api.nvim_set_option_value("modifiable", false, { buf = buf })
+		vim.api.nvim_set_option_value("buftype", "nofile", { buf = buf })
 	end
 
 	return {
@@ -147,47 +147,56 @@ function M.setup(opts)
 			return
 		end
 
-		local windows = create_diff_windows(conflict.current, conflict.incoming)
-
 		-- Set up keymaps for the diff views
 		local function close_windows()
-			vim.api.nvim_win_close(windows.windows.current, true)
-			vim.api.nvim_win_close(windows.windows.incoming, true)
-			vim.api.nvim_buf_delete(windows.buffers.current, { force = true })
-			vim.api.nvim_buf_delete(windows.buffers.incoming, { force = true })
+			if not _G.merge_windows then return end
+			vim.api.nvim_win_close(_G.merge_windows.windows.current, true)
+			vim.api.nvim_win_close(_G.merge_windows.windows.incoming, true)
+			vim.api.nvim_buf_delete(_G.merge_windows.buffers.current, { force = true })
+			vim.api.nvim_buf_delete(_G.merge_windows.buffers.incoming, { force = true })
+			_G.merge_windows = nil
 		end
+		close_windows()
+		_G.merge_windows = create_diff_windows(conflict.current, conflict.incoming)
+		vim.keymap.set("n", "q", close_windows, { noremap = true, silent = true })
 
 		-- Add keymaps for accepting changes
-		for _, buf in pairs(windows.buffers) do
-			vim.keymap.set("n", "q", close_windows, { buffer = buf })
-			vim.keymap.set("n", "<leader>mc", function()
-				vim.api.nvim_buf_set_lines(
-					0,
-					conflict.markers.start - 1,
-					conflict.markers["end"],
-					false,
-					conflict.current
-				)
-				close_windows()
-			end, { buffer = buf })
-
-			vim.keymap.set("n", "<leader>mi", function()
-				vim.api.nvim_buf_set_lines(
-					0,
-					conflict.markers.start - 1,
-					conflict.markers["end"],
-					false,
-					conflict.incoming
-				)
-				close_windows()
-			end, { buffer = buf })
-
-			vim.keymap.set("n", "<leader>mb", function()
-				local combined = combine_arrays(conflict.current, conflict.incoming)
-				vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers["end"], false, combined)
-				close_windows()
-			end, { buffer = buf })
+		local function del_keymaps()
+			vim.keymap.del("n", "<leader>mc")
+			vim.keymap.del("n", "<leader>mi")
+			vim.keymap.del("n", "<leader>mb")
 		end
+
+		vim.keymap.set("n", "<leader>mc", function()
+			vim.api.nvim_buf_set_lines(
+				0,
+				conflict.markers.start - 1,
+				conflict.markers["end"],
+				false,
+				conflict.current
+			)
+			close_windows()
+			del_keymaps()
+		end)
+
+		vim.keymap.set("n", "<leader>mi", function()
+			vim.api.nvim_buf_set_lines(
+				0,
+				conflict.markers.start - 1,
+				conflict.markers["end"],
+				false,
+				conflict.incoming
+			)
+			close_windows()
+			del_keymaps()
+		end)
+
+		vim.keymap.set("n", "<leader>mb", function()
+			local combined = combine_arrays(conflict.current, conflict.incoming)
+			vim.api.nvim_buf_set_lines(0, conflict.markers.start - 1, conflict.markers["end"], false, combined)
+			close_windows()
+			del_keymaps()
+		end)
 	end, {})
 end
 
